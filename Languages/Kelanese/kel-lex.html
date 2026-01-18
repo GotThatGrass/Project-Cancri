@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Kelanese – Lexicon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+
+  <body>
+    <div class="navbar">
+      <div class="nav-inner">
+        <div class="brand">Kelanese <span>•</span> Lexicon</div>
+        <div class="nav-links">
+          <a href="kelanese.html">Reference Grammar</a>
+          <a class="active" href="kel-lex.html">Lexicon</a>
+          <a href="languages.html">Back</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <h3>Lexicon</h3>
+
+        <div class="toc-group">
+          <div class="toc-title">Navigation</div>
+          <a href="#search">Search</a>
+          <a href="#results">Results</a>
+        </div>
+      </aside>
+
+      <main>
+        <div class="card">
+          <h1 id="search">Kelanese Lexicon</h1>
+          <div class="subtitle">
+            A working dictionary of attested Kelanese vocabulary.
+          </div>
+          <div class="badge">Draft • Working List • Version 0.1</div>
+
+          <div class="divider"></div>
+
+          <!-- Search Bar -->
+          <div class="search-bar">
+            <input id="lexSearch" type="text" placeholder="Search lexicon…" />
+            <button id="searchBtn">Search</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Results -->
+          <div id="lexicon-results"></div>
+
+          <!-- Pagination -->
+          <div id="pagination"></div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Load Lexicon Data -->
+    <script src="lexicon.js"></script>
+
+    <!-- Render Script -->
+    <script>
+      const results = document.getElementById("lexicon-results");
+      const pagination = document.getElementById("pagination");
+      const searchInput = document.getElementById("lexSearch");
+      const searchBtn = document.getElementById("searchBtn");
+
+      const itemsPerPage = 30;
+      let currentPage = 1;
+      let filtered = lexicon;
+
+      function renderEntries(page = 1) {
+        results.innerHTML = "";
+        const start = (page - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const pageItems = filtered.slice(start, end);
+
+        pageItems.forEach(item => {
+          const entry = document.createElement("div");
+          entry.className = "lexicon-entry";
+
+          entry.innerHTML = `
+            <div class="lemma">
+              <span class="word">${item.lemma}</span>
+              <span class="ipa">${item.ipa}</span>
+              <span class="pos">${item.pos}</span>
+            </div>
+            <div class="gloss"><strong>Gloss:</strong> ${item.gloss}</div>
+            <div class="usage"><strong>Usage:</strong> ${item.usage}</div>
+            <div class="example">
+              <em>${item.example}</em>
+              <span class="translation">${item.translation}</span>
+            </div>
+          `;
+
+          results.appendChild(entry);
+        });
+
+        renderPagination();
+      }
+
+      function renderPagination() {
+        pagination.innerHTML = "";
+        const totalPages = Math.ceil(filtered.length / itemsPerPage);
+
+        for (let i = 1; i <= totalPages; i++) {
+          const btn = document.createElement("button");
+          btn.innerText = i;
+          btn.onclick = () => {
+            currentPage = i;
+            renderEntries(i);
+          };
+          pagination.appendChild(btn);
+        }
+      }
+
+      function search() {
+        const query = searchInput.value.toLowerCase();
+        filtered = lexicon.filter(item => {
+          return (
+            item.lemma.toLowerCase().includes(query) ||
+            item.gloss.toLowerCase().includes(query) ||
+            item.pos.toLowerCase().includes(query)
+          );
+        });
+        currentPage = 1;
+        renderEntries(1);
+      }
+
+      searchBtn.addEventListener("click", search);
+      searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") search();
+      });
+
+      renderEntries();
+    </script>
+  </body>
+</html>
